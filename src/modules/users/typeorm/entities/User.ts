@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Exclude, Expose } from "class-transformer";
 
 
 @Entity('users')
@@ -11,8 +12,9 @@ class User {
 
   @Column()
   email: string;
-
+  // EXCLUDE SERVE PARA NÃO TRAZER A SENHA LEMBRE-SE DE USAR O instanceToInstance PARA FUNCIONAR
   @Column()
+  @Exclude()
   password: string;
 
   @Column()
@@ -23,6 +25,15 @@ class User {
 
   @UpdateDateColumn()
   updated_at: Date;
+  // EXPÕE A URL DO AVATAR
+  @Expose({ name: 'avatar_url' })
+  getAvatarUrl(): string | null {
+    if (!this.avatar) {
+      return null;
+    }
+
+    return `${process.env.APP_API_URL}/files/${this.avatar}`;
+  }
 }
 
 export default User;

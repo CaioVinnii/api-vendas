@@ -1,12 +1,15 @@
 import 'reflect-metadata';
+import 'dotenv/config';
 import express, { NextFunction, Response, Request } from 'express';
 import 'express-async-errors';
 import cors from 'cors';
 import { errors } from 'celebrate';
+import { pagination } from 'typeorm-pagination';
 import routes from './routes';
 import AppError from '@shared/errors/AppError';
 import '@shared/typeorm';
 import uploadConfig from '@config/upload';
+import rateLimiter from './middlewares/rateLimiter';
 
 const app = express();
 
@@ -15,6 +18,12 @@ app.use(cors());
 
 // CONFIGURAR PRA TRABALHAR A API SOMENTE COM JSON
 app.use(express.json());
+
+// MIDDLEWARE DE RATE LIMIT
+app.use(rateLimiter);
+
+// MIDDLEWARE PARA ADICIONAR O PAGINATE, PARA VOLTAR PAGINAS PERSONALIZADAS
+app.use(pagination);
 
 app.use('/files', express.static(uploadConfig.directory))
 
@@ -38,6 +47,9 @@ app.use(
         message: error.message
       });
     }
+
+    console.log(error)
+
     return res.status(500).json({
         status: 'error',
         message: 'Internal server error.'
